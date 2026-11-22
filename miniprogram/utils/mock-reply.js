@@ -159,10 +159,27 @@ var RULES = [
       '好事啊！难得听你说这么开心，快细说，我认真听着呢。'
     ]
   },
+  // ===== 具体话题/兴趣爱好：用户主动抛出一个话题（书、影视、游戏等）=====
+  // 放在 daily_chat 之前：只要文本带具体话题名词就接住话题，不再误判成"想找人聊聊"。
+  // 注意这里只放【话题名词】，不放裸"聊聊"——否则无对象的"想聊聊"也会被抢走。
+  {
+    name: 'hobby_topic',
+    label: '具体话题/兴趣爱好',
+    keywords: [
+      '三国', '水浒', '西游', '红楼梦', '名著', '小说', '看书', '读书', '这本书',
+      '电影', '电视剧', '追剧', '看剧', '动漫', '番剧', '游戏', '听歌', '音乐', '唱歌',
+      '篮球', '足球', '球赛', '球星', '历史'
+    ],
+    replies: [
+      '好呀，你愿意聊这个我挺高兴。你是最近在看，还是突然想起来？从哪儿说起都行，我听着。',
+      '来，我听着。你最想聊里面的哪块？人物、情节，还是读到的一段感受？跟着你的话走。'
+    ]
+  },
   {
     name: 'daily_chat',
     label: '想找人聊聊',
-    keywords: ['聊聊', '想找人', '闲聊', '陪我', '在吗', '无聊', '说说话'],
+    // 去掉裸"聊聊"：带具体话题的交给 hobby_topic；这里只接泛泛的陪伴需求
+    keywords: ['想找人', '找人聊', '陪我聊', '陪聊', '闲聊', '在吗', '在不在', '无聊', '说说话', '唠唠', '想聊聊', '聊聊'],
     replies: [
       '正好我也在。想说什么都行，开心的、烦心的、没头没脑的都可以——你先起个头？',
       '我在呢。今天有什么想分享的，还是就想有个人搭搭话？都行，我陪着你。'
@@ -214,9 +231,18 @@ var CRISIS_CARD = {
   followUp: '已为你标记人工跟进，会有专人联系你'
 };
 
-/** 随机取一条（仅在同情境的等价改写间调用） */
-function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
+/**
+ * 随机取一条（仅在同情境的等价改写间调用）
+ * @param {Array} list 候选话术
+ * @param {string} avoid 上一轮助手回复，命中时换一条，避免连续复读同一句
+ */
+function pick(list, avoid) {
+  var pool = list;
+  if (avoid && list.length > 1) {
+    var filtered = list.filter(function (x) { return x !== avoid; });
+    if (filtered.length) pool = filtered;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 /**
@@ -243,12 +269,13 @@ function matchRule(text) {
 /**
  * 对外主入口：根据用户输入返回模拟回复
  * @param {string} text 用户输入
+ * @param {string} lastAssistantContent 上一轮助手回复（用于避免连续复读同一句）
  * @returns {{content: string, crisis: boolean, scene: string}}
  */
-function getReply(text) {
+function getReply(text, lastAssistantContent) {
   var rule = matchRule(text);
   return {
-    content: pick(rule ? rule.replies : DEFAULT_REPLIES),
+    content: pick(rule ? rule.replies : DEFAULT_REPLIES, lastAssistantContent),
     crisis: !!(rule && rule.crisis),
     scene: rule ? rule.name : 'default'
   };
