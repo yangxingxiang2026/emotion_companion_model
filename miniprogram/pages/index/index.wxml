@@ -11,7 +11,10 @@
         <text class="online-text">在线陪伴中</text>
       </view>
     </view>
-    <view class="clear-btn" hover-class="clear-btn-hover" bindtap="onClearTap">清空</view>
+    <view class="header-actions">
+      <view class="clear-btn" hover-class="clear-btn-hover" bindtap="onExportTap">导出</view>
+      <view class="clear-btn" hover-class="clear-btn-hover" bindtap="onClearTap">清空</view>
+    </view>
   </view>
 
   <!-- 消息列表（scroll-view 独立滚动，整页不可滚动） -->

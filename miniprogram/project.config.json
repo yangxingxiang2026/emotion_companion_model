@@ -1,5 +1,5 @@
 {
-  "description": "情感陪聊小程序「许清楚」——UI 壳子阶段（模拟回复，不接真实模型/云开发）",
+  "description": "情感陪聊小程序「许清楚」——云函数代理大模型 API（含 mock 降级）",
   "packOptions": {
     "ignore": [],
     "include": []
@@ -46,6 +46,7 @@
   "appid": "wxa3530f81fc9b12bc",
   "projectname": "情感陪聊许清楚",
   "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
   "condition": {},
   "editorSetting": {
     "tabIndent": "insertSpaces",

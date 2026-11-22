@@ -88,6 +88,13 @@
   margin-left: 8rpx;
 }
 
+.header-actions {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .clear-btn {
   flex: none;
   display: flex;

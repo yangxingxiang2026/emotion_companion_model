@@ -1,6 +1,7 @@
 // pages/index/index.js —— 聊天主页面逻辑
-// 说明：UI 壳子阶段，回复来自本地规则库；不接真实模型、不接云开发。
+// 说明：优先走云函数调真实模型，失败/未配云环境时自动降级到本地 mock 规则库。
 var mock = require('../../utils/mock-reply.js');
+var api = require('../../utils/api.js');
 
 // 本地会话历史存储键
 var STORAGE_KEY = 'xuqingchu_chat_history_v1';
@@ -188,23 +189,27 @@ Page({
       self.saveHistory(afterUser);
     });
 
-    // 2) 规则库命中（危机优先），延迟模拟助手回复
-    var reply = mock.getReply(text);
-    var delay = 700 + Math.floor(Math.random() * 600); // 700~1300ms
-    this._replyTimer = setTimeout(function () {
-      var assistantMsg = makeMessage('assistant', reply.content, { crisis: reply.crisis });
-      var assistantIndex = self.data.messages.length;
-      var finalMessages = appendMessage(self.data.messages, assistantMsg);
+    // 2) 请求回复（云函数真实模型，失败降级 mock；危机由 api 层本地硬兜底）
+    // 保留最小 500ms 打字动画，避免真实 API 秒回时体验突兀；API 慢则不人为拖长。
+    var startedAt = Date.now();
+    api.getReply(text, this.data.messages, function (reply) {
+      var elapsed = Date.now() - startedAt;
+      var rest = elapsed < 500 ? (500 - elapsed) : 0;
+      self._replyTimer = setTimeout(function () {
+        var assistantMsg = makeMessage('assistant', reply.content, { crisis: reply.crisis });
+        var assistantIndex = self.data.messages.length;
+        var finalMessages = appendMessage(self.data.messages, assistantMsg);
 
-      var assistantPatch = {};
-      assistantPatch['messages[' + assistantIndex + ']'] = finalMessages[finalMessages.length - 1];
-      assistantPatch.isTyping = false;
-      self.setData(assistantPatch, function () {
-        self.scrollToBottom();
-        self.saveHistory(finalMessages);
-      });
-      self._replyTimer = null;
-    }, delay);
+        var assistantPatch = {};
+        assistantPatch['messages[' + assistantIndex + ']'] = finalMessages[finalMessages.length - 1];
+        assistantPatch.isTyping = false;
+        self.setData(assistantPatch, function () {
+          self.scrollToBottom();
+          self.saveHistory(finalMessages);
+        });
+        self._replyTimer = null;
+      }, rest);
+    });
   },
 
   /** 点击危机热线：直接唤起系统拨号（危机场景降低操作成本） */
@@ -215,6 +220,50 @@ Page({
       phoneNumber: number,
       fail: function () {
         wx.showToast({ title: '拨打未成功，请手动拨号', icon: 'none' });
+      }
+    });
+  },
+
+  /**
+   * 导出会话：把当前对话转成训练友好的 JSONL 复制到剪贴板，便于攒真实语料。
+   * 只导出 user/assistant 轮次，附来源与时间戳；危机轮次单独标注需人工复核。
+   */
+  onExportTap: function () {
+    var self = this;
+    var msgs = this.data.messages || [];
+    var pairs = [];
+    for (var i = 0; i < msgs.length; i++) {
+      var m = msgs[i];
+      if (!m || m.isWelcome || (m.role !== 'user' && m.role !== 'assistant')) continue;
+      pairs.push({
+        role: m.role,
+        content: m.content,
+        crisis: !!m.crisis,
+        ts: m.ts
+      });
+    }
+    if (!pairs.length) {
+      wx.showToast({ title: '暂无可导出的对话', icon: 'none' });
+      return;
+    }
+    var payload = {
+      source: 'xuqingchu_miniprogram',
+      exported_at: new Date().toISOString(),
+      note: '真实用户对话，入训练集前需脱敏 + 人工审核；crisis=true 的轮次不得用于模型训练',
+      messages: pairs
+    };
+    var text = JSON.stringify(payload, null, 2);
+    wx.setClipboardData({
+      data: text,
+      success: function () {
+        wx.showModal({
+          title: '已导出',
+          content: '对话 JSON 已复制到剪贴板（' + pairs.length + ' 条），可粘贴到文件保存。入训练集前请先脱敏。',
+          showCancel: false
+        });
+      },
+      fail: function () {
+        wx.showToast({ title: '复制失败，请重试', icon: 'none' });
       }
     });
   },

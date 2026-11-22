@@ -1,0 +1,10 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "情感陪聊许清楚 - 大模型代理云函数（零第三方依赖）",
+  "main": "index.js",
+  "dependencies": {},
+  "scripts": {
+    "test": "node test.js"
+  }
+}
