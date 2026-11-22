@@ -1,0 +1,97 @@
+# =============================================================================
+# 情感陪聊「许清楚」提示词/模型变更 —— 自动回归门禁 CI
+# 配套脚本：06_regression_check.py（Python3 零第三方依赖）
+# 设计原则：改 prompt/SFT/DPO/模型必跑；先看 dry-run 自检，再按需跑真实 API 门禁；
+#           CI 只认脚本 exit code（0=全过 / 1=FAIL或ERROR / 2=配置错）。
+# =============================================================================
+name: emotion-companion-regression
+
+# 触发时机：
+#   1) push：只有改动 03/04/05/06/07 或本工作流文件时才跑（无关提交不浪费 CI）；
+#   2) pull_request：PR 改动同样路径时跑（fork 无 secrets，会自动降级为仅 dry-run）；
+#   3) workflow_dispatch：手动触发，发版前可跑一次全量。
+on:
+  push:
+    paths:
+      - '03_sft_trainset.jsonl'
+      - '04_dpo_preference.jsonl'
+      - '05_提示工程起步模板.md'
+      - '06_regression_check.py'
+      - '07_回归用例说明.md'
+      - '.github/workflows/regression.yml'
+  pull_request:
+    paths:
+      - '03_sft_trainset.jsonl'
+      - '04_dpo_preference.jsonl'
+      - '05_提示工程起步模板.md'
+      - '06_regression_check.py'
+      - '07_回归用例说明.md'
+      - '.github/workflows/regression.yml'
+  workflow_dispatch:
+
+# 并发控制：同一 ref（分支/PR）上多次提交只保留最新运行，自动取消进行中的旧运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 最小权限：本流程只需读取仓库内容
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: 回归门禁
+    runs-on: ubuntu-latest
+
+    # 将 secrets 映射为 job 级 env —— 关键：GitHub Actions 不允许在 if 条件里
+    # 直接引用 secrets 上下文，必须经 env 中转；未配置的 secret 在此为空字符串，
+    # 正是下面"跳过真实门禁"逻辑的判断依据。
+    env:
+      API_BASE: ${{ secrets.API_BASE }}
+      API_KEY: ${{ secrets.API_KEY }}
+      MODEL: ${{ secrets.MODEL }}
+
+    steps:
+      # 1) 拉取代码
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # 2) 准备 Python 3.11（脚本零第三方依赖，版本固定保证可复现）
+      - name: 设置 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3) 无成本自检：不调 API，验证断言逻辑 + 内置理想话术，并产出 dry-run 报告。
+      #    对所有事件都执行，fork PR / 未配 secrets 时至少保留一层基础校验。
+      - name: dry-run 自检（不调 API，不花钱）
+        run: python 06_regression_check.py --dry-run
+        env:
+          NO_COLOR: '1'
+
+      # 4) 真实 API 门禁：仅当三项 secret 全部配置才执行。
+      #    三项必须全配：脚本用 os.getenv 读值，空字符串会直接当配置值——
+      #    API_BASE 空 -> url="/chat/completions"；MODEL 空 -> 空模型名；
+      #    API_KEY 空 -> Bearer 空。任一为空都会让 20 条全 ERROR、exit 1，
+      #    制造"模型有严重问题"的假阳性。fork PR 拿不到 secrets 也在此被跳过。
+      - name: 真实 API 回归门禁（全量 20 条）
+        if: ${{ env.API_BASE != '' && env.API_KEY != '' && env.MODEL != '' }}
+        run: python 06_regression_check.py
+        env:
+          NO_COLOR: '1'
+
+      # 5) 跳过说明：与上一步条件互斥，明确告知"真实门禁未执行"，避免把 CI 绿灯误读为线上通过。
+      - name: 跳过真实门禁说明
+        if: ${{ env.API_BASE == '' || env.API_KEY == '' || env.MODEL == '' }}
+        run: |
+          echo "::warning::未检测到完整的 API_BASE / API_KEY / MODEL secrets（fork PR 或尚未配置），已跳过真实 API 门禁，本次仅执行 dry-run 自检。"
+          echo "::notice::dry-run 使用内置理想话术，不代表线上真实行为。请在仓库 Settings > Secrets and variables > Actions 配置这三个 secret 后重跑，真实门禁才会生效。"
+
+      # 6) 无论成败都上传报告（真实门禁跑过=真实结果；被跳过=dry-run 结果），便于失败定位。
+      - name: 上传回归报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report
+          path: regression_report.json
+          if-no-files-found: warn
