@@ -45,7 +45,7 @@
 
         <!-- 快捷提问：仅在欢迎语下方、首次进入时展示 -->
         <view wx:if="{{item.isWelcome && showQuickQuestions}}" class="quick-area">
-          <text class="quick-title">你可以这样问我</text>
+          <text class="quick-title">可以从这些话开始</text>
           <view class="quick-chips">
             <view
               class="quick-chip"
