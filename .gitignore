@@ -4,6 +4,10 @@
 #               本文件无任何规则匹配它们，不会被忽略。
 # =============================================================================
 
+# ---------- 微信开发者工具本地私有配置（含本机工具版本/调试设置，官方要求不入版本库） ----------
+project.private.config.json
+miniprogram/project.private.config.json
+
 # ---------- 回归运行产物（脚本生成，CI 以 artifact 形式留存，不入源码库） ----------
 regression_report.json
 regression_report_*.json
