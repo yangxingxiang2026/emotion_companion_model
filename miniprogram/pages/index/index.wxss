@@ -1,0 +1,504 @@
+/* pages/index/index.wxss —— 聊天页样式
+ * 750rpx 基准；色值一律引用 styles/variable.wxss 的 --xc-* 语义变量
+ */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--xc-bg-page);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ---------- 顶部信息栏（88rpx，规范 4.1） ---------- */
+.header {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 88rpx;
+  /* 顶部安全区兜底；运行时由 WXML inline style 注入 JS 取到的真实 statusBarHeight 覆盖 */
+  padding-top: env(safe-area-inset-top);
+  /* 高度/胶囊避让由 WXML inline style 按系统真实尺寸注入 */
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+  background: var(--xc-bg-surface);
+  border-bottom: 1rpx solid var(--xc-border);
+  box-sizing: border-box;
+}
+
+.avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--xc-brand);
+  color: var(--xc-text-on-brand);
+  font-weight: 600;
+}
+
+.avatar-lg {
+  width: 56rpx;
+  height: 56rpx;
+  font-size: 26rpx;
+}
+
+.avatar-sm {
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 28rpx;
+}
+
+.avatar-user {
+  background: var(--xc-avatar-user-bg);
+}
+
+.header-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 16rpx;
+}
+
+.header-name-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.header-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--xc-text-primary);
+}
+
+.online-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: var(--xc-secondary);
+  margin-left: 8rpx;
+}
+
+.online-text {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--xc-text-secondary);
+  margin-left: 8rpx;
+}
+
+.clear-btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx; /* 触控热区 ≥88rpx */
+  min-width: 88rpx;
+  font-size: 24rpx;
+  color: var(--xc-text-secondary);
+  padding: 0 12rpx;
+  margin-left: 8rpx;
+  box-sizing: border-box;
+}
+
+.clear-btn-hover {
+  color: var(--xc-brand-strong);
+}
+
+/* ---------- 消息列表（规范 4.2） ---------- */
+.msg-list {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.msg-inner {
+  padding: 24rpx 24rpx 40rpx;
+  box-sizing: border-box;
+}
+
+/* 免责声明：首屏一条弱提示 */
+.disclaimer {
+  background: var(--xc-bg-subtle);
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.disclaimer-text {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--xc-text-secondary);
+}
+
+.time-row {
+  text-align: center;
+  margin: 24rpx 0;
+}
+
+.time-text {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--xc-text-secondary);
+}
+
+.msg-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.msg-row-assistant {
+  justify-content: flex-start;
+}
+
+.msg-row-user {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 20rpx 28rpx;
+  box-sizing: border-box;
+}
+
+.bubble-assistant {
+  margin-left: 16rpx;
+  background: var(--xc-bubble-bot-bg);
+  color: var(--xc-bubble-bot-text);
+  /* 左上小圆角形成指向助手头像的尖角 */
+  border-radius: 4rpx var(--xc-radius-md) var(--xc-radius-md) var(--xc-radius-md);
+  box-shadow: var(--xc-shadow-sm);
+}
+
+.bubble-user {
+  margin-right: 16rpx;
+  background: var(--xc-bubble-user-bg);
+  color: var(--xc-bubble-user-text);
+  /* 右上小圆角形成指向用户头像的尖角 */
+  border-radius: var(--xc-radius-md) 4rpx var(--xc-radius-md) var(--xc-radius-md);
+}
+
+.bubble-text {
+  display: block;
+  font-size: var(--xc-fs-base);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ---------- 快捷提问 chip（规范 4.3） ---------- */
+.quick-area {
+  margin: -4rpx 0 28rpx 80rpx;
+}
+
+.quick-title {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--xc-text-secondary);
+  margin-bottom: 16rpx;
+}
+
+.quick-chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.quick-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx; /* 视觉可更紧凑，但点击热区须 ≥88rpx */
+  padding: 12rpx 28rpx;
+  background: var(--xc-bg-subtle);
+  border: 1rpx solid var(--xc-border);
+  color: var(--xc-text-secondary);
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  margin: 0 16rpx 16rpx 0;
+  box-sizing: border-box;
+}
+
+.quick-chip-hover {
+  background: var(--xc-crisis-badge-bg);
+  color: var(--xc-brand-strong);
+}
+
+/* ---------- 危机转介卡片（规范 4.7，必过项） ---------- */
+.crisis-wrap {
+  width: 86%;
+  margin: -8rpx 0 28rpx 80rpx;
+  box-sizing: border-box;
+}
+
+.crisis-card {
+  position: relative;
+  background: var(--xc-crisis-bg);
+  border: 2rpx solid var(--xc-crisis-border);
+  border-left: 8rpx solid var(--xc-crisis-accent);
+  border-radius: var(--xc-radius-lg);
+  padding: 28rpx 32rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.crisis-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* 关怀图标：emoji 双通道编码，不使用感叹号警笛图形 */
+.crisis-icon {
+  font-size: 40rpx;
+  line-height: 1.2;
+  margin-right: 16rpx;
+}
+
+.crisis-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--xc-crisis-text);
+}
+
+.crisis-subtitle {
+  display: block;
+  font-size: var(--xc-fs-base);
+  line-height: 1.6;
+  color: var(--xc-crisis-body);
+  margin: 16rpx 0 24rpx;
+}
+
+.crisis-hotlines {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 首选号码：88rpx 高，加粗描边 */
+.crisis-hotline-primary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 24rpx;
+  margin-bottom: 16rpx;
+  background: var(--xc-bg-surface);
+  border: 2rpx solid var(--xc-crisis-hotline-border);
+  border-radius: var(--xc-radius-md);
+  box-sizing: border-box;
+}
+
+.crisis-hotline-secondary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 72rpx;
+  padding: 0 24rpx;
+  margin-bottom: 16rpx;
+  background: var(--xc-bg-surface);
+  border: 1rpx solid var(--xc-border);
+  border-radius: var(--xc-radius-md);
+  box-sizing: border-box;
+}
+
+.crisis-hotline-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.crisis-hotline-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  color: var(--xc-text-secondary);
+}
+
+.crisis-hotline-number {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--xc-crisis-hotline-text);
+  white-space: nowrap;
+}
+
+.crisis-hotline-secondary .crisis-hotline-number {
+  font-size: 28rpx;
+  color: var(--xc-text-secondary);
+}
+
+.crisis-hotline-note {
+  font-size: 24rpx;
+  color: var(--xc-text-secondary);
+  margin-left: 12rpx;
+  white-space: nowrap;
+}
+
+.crisis-emergency {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.crisis-emergency-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+}
+
+.crisis-emergency-label {
+  font-size: var(--xc-fs-base);
+  color: var(--xc-text-secondary);
+}
+
+.crisis-emergency-number {
+  font-size: var(--xc-fs-base);
+  font-weight: 600;
+  color: var(--xc-crisis-text);
+  margin-left: 8rpx;
+}
+
+/* 人工跟进徽章：呼吸点（opacity 缓动，非闪烁） */
+.crisis-foot {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  align-self: flex-end;
+  margin-top: 20rpx;
+  padding: 8rpx 20rpx;
+  background: var(--xc-crisis-badge-bg);
+  border-radius: 999rpx;
+}
+
+.crisis-foot-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: var(--xc-crisis-accent);
+  margin-right: 8rpx;
+  animation: breath 1.5s ease-in-out infinite;
+}
+
+.crisis-foot-text {
+  font-size: 24rpx;
+  color: var(--xc-crisis-text);
+}
+
+@keyframes breath {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ---------- 打字动画（规范 4.5） ---------- */
+.typing-row {
+  margin-bottom: 24rpx;
+}
+
+.bubble-typing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 88rpx;
+  min-height: 56rpx;
+}
+
+.typing-dots {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.typing-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--xc-text-placeholder);
+  margin: 0 6rpx;
+  animation: dotPulse 0.6s infinite ease-in-out;
+}
+
+.typing-dot-2 {
+  animation-delay: 0.2s;
+}
+
+.typing-dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+  0%, 60%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6rpx);
+  }
+}
+
+.list-end {
+  height: 2rpx;
+}
+
+/* ---------- 输入区（规范 4.3） ---------- */
+.input-bar {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: var(--xc-bg-surface);
+  border-top: 1rpx solid var(--xc-border);
+  box-shadow: var(--xc-shadow-md);
+  box-sizing: border-box;
+}
+
+.input-box {
+  flex: 1;
+  min-height: 88rpx;
+  max-height: 200rpx;
+  padding: 20rpx 24rpx;
+  background: var(--xc-bg-subtle);
+  border-radius: var(--xc-radius-md);
+  font-size: var(--xc-fs-base);
+  line-height: 1.5;
+  color: var(--xc-text-primary);
+  box-sizing: border-box;
+}
+
+.input-placeholder {
+  color: var(--xc-text-placeholder);
+}
+
+.send-btn {
+  flex: none;
+  width: 88rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 36rpx;
+  margin-left: 16rpx;
+  box-sizing: border-box;
+}
+
+.send-btn-active {
+  background: var(--xc-brand-strong);
+  color: var(--xc-text-on-brand);
+}
+
+.send-btn-disabled {
+  background: var(--xc-avatar-user-bg);
+  color: var(--xc-text-on-brand);
+}
+
+.send-btn-hover {
+  background: var(--xc-brand-press);
+  transform: scale(0.96);
+}

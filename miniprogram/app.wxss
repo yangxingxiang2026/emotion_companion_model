@@ -1,0 +1,26 @@
+/* app.wxss —— 全局样式
+ * Design Token 统一放在 styles/variable.wxss（UI 设计规范 Semantic 层）
+ */
+@import "./styles/variable.wxss";
+
+page {
+  background-color: var(--xc-bg-page);
+  color: var(--xc-text-primary);
+  font-size: var(--xc-fs-base);
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* 基础工具类 */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}

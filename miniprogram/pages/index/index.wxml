@@ -1,0 +1,140 @@
+<!--pages/index/index.wxml —— 聊天主页面（对标主流 AI 对话助手）-->
+<view class="page">
+
+  <!-- 顶部信息栏：头像 + 名称 + 在线状态 + 清空入口（规范 4.1） -->
+  <view class="header" style="padding-top: {{statusBarHeight}}px; height: {{headerHeightPx}}px; padding-right: {{capsuleReservePx}}px;">
+    <view class="avatar avatar-lg" aria-label="许清楚">许</view>
+    <view class="header-info">
+      <view class="header-name-row">
+        <text class="header-name">许清楚</text>
+        <view class="online-dot"></view>
+        <text class="online-text">在线陪伴中</text>
+      </view>
+    </view>
+    <view class="clear-btn" hover-class="clear-btn-hover" bindtap="onClearTap">清空</view>
+  </view>
+
+  <!-- 消息列表（scroll-view 独立滚动，整页不可滚动） -->
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation
+  >
+    <view class="msg-inner">
+
+      <!-- 首屏免责声明：弱提示，仅首次进入展示一次 -->
+      <view wx:if="{{showDisclaimer}}" class="disclaimer">
+        <text class="disclaimer-text">{{disclaimerText}}</text>
+      </view>
+
+      <block wx:for="{{messages}}" wx:key="id">
+        <!-- 时间戳：按时间分组，非每条都显示 -->
+        <view wx:if="{{item.showTime}}" class="time-row">
+          <text class="time-text">{{item.time}}</text>
+        </view>
+
+        <!-- 消息气泡：side / isAssistant / isUser 由 JS 预计算 -->
+        <view class="msg-row msg-row-{{item.side}}">
+          <view wx:if="{{item.isAssistant}}" class="avatar avatar-sm" aria-label="许清楚">许</view>
+          <view class="bubble bubble-{{item.side}}">
+            <text class="bubble-text" selectable="{{true}}">{{item.content}}</text>
+          </view>
+          <view wx:if="{{item.isUser}}" class="avatar avatar-sm avatar-user">我</view>
+        </view>
+
+        <!-- 快捷提问：仅在欢迎语下方、首次进入时展示 -->
+        <view wx:if="{{item.isWelcome && showQuickQuestions}}" class="quick-area">
+          <text class="quick-title">你可以这样问我</text>
+          <view class="quick-chips">
+            <view
+              class="quick-chip"
+              wx:for="{{quickQuestions}}"
+              wx:for-item="q"
+              wx:key="*this"
+              data-text="{{q}}"
+              bindtap="onQuickTap"
+              hover-class="quick-chip-hover"
+            >{{q}}</view>
+          </view>
+        </view>
+
+        <!-- 核心安全特性：命中危机关键词时，气泡下方渲染转介卡片（规范 4.7） -->
+        <view wx:if="{{item.crisis}}" class="crisis-wrap">
+          <view class="crisis-card">
+            <view class="crisis-head">
+              <text class="crisis-icon">🫂</text>
+              <text class="crisis-title">我想认真帮你一下</text>
+            </view>
+            <text class="crisis-subtitle">你不必独自面对。请现在联系下面的人，我已经为你标记人工跟进，会有专人联系你。</text>
+
+            <view class="crisis-hotlines">
+              <view
+                class="crisis-hotline-{{line.style}}"
+                wx:for="{{crisisCard.hotlines}}"
+                wx:for-item="line"
+                wx:key="number"
+                data-number="{{line.number}}"
+                bindtap="onCallTap"
+                hover-class="crisis-hotline-hover"
+                aria-label="拨打热线{{line.number}}"
+              >
+                <text class="crisis-hotline-icon">📞</text>
+                <text class="crisis-hotline-name">{{line.name}}</text>
+                <text class="crisis-hotline-number">{{line.number}}</text>
+                <text wx:if="{{line.note}}" class="crisis-hotline-note">{{line.note}}</text>
+              </view>
+            </view>
+
+            <view class="crisis-emergency">
+              <text class="crisis-emergency-icon">⚠</text>
+              <text class="crisis-emergency-label">若已受伤或控制不住，立刻拨打</text>
+              <text class="crisis-emergency-number">{{crisisCard.emergency}}</text>
+            </view>
+
+            <view class="crisis-foot">
+              <view class="crisis-foot-dot"></view>
+              <text class="crisis-foot-text">{{crisisCard.followUp}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 助手「正在输入…」打字动画 -->
+      <view wx:if="{{isTyping}}" class="msg-row msg-row-assistant typing-row">
+        <view class="avatar avatar-sm">许</view>
+        <view class="bubble bubble-assistant bubble-typing">
+          <view class="typing-dots">
+            <view class="typing-dot typing-dot-1"></view>
+            <view class="typing-dot typing-dot-2"></view>
+            <view class="typing-dot typing-dot-3"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 滚动锚点 -->
+      <view id="msg-end" class="list-end"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区：多行文本框 + 发送按钮 -->
+  <view class="input-bar">
+    <textarea
+      class="input-box"
+      value="{{inputValue}}"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      confirm-type="send"
+      placeholder="说点什么，我在这儿…"
+      placeholder-class="input-placeholder"
+      maxlength="500"
+      auto-height
+      show-confirm-bar="{{false}}"
+      cursor-spacing="16"
+      focus="{{inputFocus}}"
+      aria-label="输入消息"
+    />
+    <view class="{{sendClass}}" hover-class="send-btn-hover" bindtap="onSend" aria-label="发送">➤</view>
+  </view>
+
+</view>

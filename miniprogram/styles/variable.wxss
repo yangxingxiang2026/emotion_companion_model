@@ -1,0 +1,50 @@
+/* styles/variable.wxss —— UI 设计规范 Semantic 层 Design Token
+ * 来源：miniprogram/docs/UI设计规范.md 第 3.2 节（唯一视觉依据）
+ * 组件只引用本文件的变量，不硬编码色值，便于换肤/暗色覆盖。
+ */
+page {
+  --xc-bg-page: #FBF9F7;
+  --xc-bg-surface: #FFFFFF;
+  --xc-bg-subtle: #F5F1ED;
+
+  --xc-brand: #D16B4C;
+  --xc-brand-strong: #B85A3F;
+  --xc-brand-press: #96482F;
+
+  --xc-text-primary: #2A241F;
+  --xc-text-secondary: #7D736A;
+  --xc-text-placeholder: #A89E94;
+  --xc-text-on-brand: #FFFFFF;
+
+  --xc-border: #EBE5DF;
+
+  --xc-bubble-user-bg: #F7E6DF;
+  --xc-bubble-user-text: #3D3630;
+  --xc-bubble-bot-bg: #FFFFFF;
+  --xc-bubble-bot-text: #2A241F;
+
+  --xc-crisis-bg: #FFF7F2;
+  --xc-crisis-border: #ECC3B2;
+  --xc-crisis-accent: #C96A4F;
+  --xc-crisis-text: #8A3B27;
+
+  --xc-secondary: #3E9C7A;
+  --xc-error: #C0453B;
+
+  /* 组件补充语义色（均取自规范 Primitive / Component 层） */
+  --xc-avatar-user-bg: #D9D1C9;
+  --xc-crisis-body: #4A3B33;
+  --xc-crisis-hotline-border: #E3A78F;
+  --xc-crisis-hotline-text: #A8482F;
+  --xc-crisis-badge-bg: #FBE4DD;
+
+  /* 字阶 / 圆角 / 间距（按规范字面值统一） */
+  --xc-fs-xs: 24rpx;
+  --xc-fs-sm: 26rpx;
+  --xc-fs-base: 28rpx;
+  --xc-fs-md: 32rpx;
+  --xc-radius-md: 20rpx;
+  --xc-radius-lg: 28rpx;
+  --xc-shadow-sm: 0 2rpx 8rpx rgba(42, 36, 31, 0.06);
+  --xc-shadow-md: 0 -4rpx 16rpx rgba(42, 36, 31, 0.08);
+}
